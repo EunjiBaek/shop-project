@@ -5,7 +5,10 @@ import { Icon, Col, Card, Row, Carousel} from 'antd';
 import Meta from 'antd/lib/card/Meta';
 import ImageSlider from '../../Utils/ImageSlider';
 import CheckBox from './Sections/CheckBox';
-import { continents } from './Sections/Datas';
+import RadioBox from './Sections/RadioBox';
+import SearchFeature from './Sections/SearchFeature';
+import { continents, price } from './Sections/Datas';
+
 
 
 
@@ -19,6 +22,7 @@ function LandingPage() {
         continents: [],
         price: []
     });
+    const [SearchTerm, setSearchTerm] = useState("");
 
 
     useEffect(() => {
@@ -72,11 +76,11 @@ function LandingPage() {
 
         return <Col lg={6} md={8} xs={24} key={index}>
             <Card
-                cover={<ImageSlider images={product.images}/>}
+                cover={<a href={`/product/${product._id}`}><ImageSlider images={product.images} /></a>}
             >
                 <Meta 
                     title={product.title}
-                    discription={`$${product.price}`}
+                    description={`$${product.price}`}
                 />
             </Card>
         </Col>
@@ -93,8 +97,24 @@ function LandingPage() {
         getProducts(body)
         setSkip(0)
 
-
     }
+
+    const hadlePrice = (value) => {
+        const data =price;
+        let array = [];
+
+        for(let key in data) {
+
+            if(data[key]._id === parseInt(value, 10)){
+                array = data[key].array;
+            }
+
+        }
+
+
+        return array;
+    }
+
 
     const handleFilters = (filters, catecory) => {
 
@@ -102,7 +122,28 @@ function LandingPage() {
 
         newFilters[catecory] = filters
 
+        if(catecory === "price"){
+            let priceValue = hadlePrice(filters)
+            newFilters[catecory] = priceValue
+        }
+
         showFilterResults(newFilters)
+        setFilters(newFilters)
+
+    }
+
+    const updateSearchTerm = (newSeachTerm) => {
+        setSearchTerm(newSeachTerm)
+        let body = {
+            skip: 0,
+            limit: Limit,
+            filters: Filters,
+            searchTerm: newSeachTerm
+        }
+
+        setSkip(0)
+        setSearchTerm(newSeachTerm)
+        getProducts(body)
 
     }
 
@@ -117,16 +158,27 @@ function LandingPage() {
 
             {/* Filter */}
 
+            <Row gutter={[16, 16]}>
+                <Col lg={12} xs={24}>
+                    {/* Checkbox */}
+                    < CheckBox list={continents} handleFilters={filters => handleFilters(filters, "continents")}/>
+                </Col>
+                <Col lg={12} xs={24}>
+                    {/* Radiobox */}
+                    <RadioBox list={price} handleFilters={filters => handleFilters(filters, "price")}/>
+                </Col>
+            </Row>
 
-            {/* Checkbox */}
-            < CheckBox list={continents} handleFilters={filters => handleFilters(filters, "continents")}/>
-
-
-            {/* Radiobox */}
 
 
 
             {/* search */}
+            <div style={{display:'flex', justifyContent:'flex-end', margin: '1rem auto'}}>
+                <SearchFeature 
+                    refreshFunction={updateSearchTerm}
+                />
+            </div>
+            
 
             {/* Cards */}
             
